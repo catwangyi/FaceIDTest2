@@ -44,7 +44,11 @@ public class LoginActivity extends AppCompatActivity {
     private String pwd;
     private User user;
     private static final String[] NEEDED_PERMISSIONS = new String[]{
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CAMERA,
+            Manifest.permission.INTERNET,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
     };
     private SharedPreferences mPreferences;
     private SharedPreferences.Editor mEditor;

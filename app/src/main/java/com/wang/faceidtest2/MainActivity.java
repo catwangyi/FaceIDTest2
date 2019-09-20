@@ -5,16 +5,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -29,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ZoomControls;
 
+import com.arcsoft.face.FaceEngine;
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
@@ -42,6 +40,7 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
+import com.wang.faceidtest2.util.ConfigUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -99,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);//菜单按钮
         }
 
+
+
         //navigationView.setCheckedItem(R.id.nav_log);//设置默认选项
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
 
@@ -128,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ConfigUtil.setFtOrient(getApplicationContext(), FaceEngine.ASF_OP_0_HIGHER_EXT);
         mProgressDialog = new ProgressDialog(MainActivity.this);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage("正在上传图片，请稍后...");
@@ -169,8 +171,10 @@ public class MainActivity extends AppCompatActivity {
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                startActivity(intent);
                 //Toast.makeText(getApplicationContext(),"点击!" ,Toast.LENGTH_SHORT).show();
-                String imagename = username+".jpg";
+                /*String imagename = username+".jpg";
                 File outputImage=new File(getExternalCacheDir(),imagename);//创建File对象，用于存储拍照后的照片
                 imagePath_take=getExternalCacheDir()+"/"+imagename;
                 try{
@@ -189,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 //启动相机程序
                 Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri );
-                startActivityForResult(intent,TAKE_PHOTO);
+                startActivityForResult(intent,TAKE_PHOTO);*/
             }
         });
     }
