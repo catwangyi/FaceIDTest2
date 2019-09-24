@@ -7,12 +7,24 @@
     android:layout_height="match_parent"
     tools:context=".PreviewActivity">
 
-    <TextureView
-        android:id="@+id/texture_preview"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-    <com.wang.faceidtest2.widget.FaceRectView
-        android:id="@+id/face_rect_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+        <TextureView
+            android:id="@+id/texture_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <com.wang.faceidtest2.widget.FaceRectView
+            android:id="@+id/face_rect_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:id="@+id/sendImg"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:onClick="sendImg"
+        android:text="发送" />
 </FrameLayout>

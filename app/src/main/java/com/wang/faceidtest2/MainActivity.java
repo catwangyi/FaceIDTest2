@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
+                intent.putExtra("Name", "test");
                 startActivity(intent);
                 //Toast.makeText(getApplicationContext(),"点击!" ,Toast.LENGTH_SHORT).show();
                 /*String imagename = username+".jpg";
