@@ -70,6 +70,11 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFirstLocate = true;//用来显示是否是第一次定位
     private DrawerLayout mDrawerLayout;
     private String username;
+    private double Latitude;
+    private double Longitude;
+    private String userid;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         final Intent intent=getIntent();
         username = (String)intent.getSerializableExtra("Name");
+        userid = (String)intent.getSerializableExtra("userid");
+        Log.i(TAG,"userid"+userid );
         final NavigationView navigationView = findViewById(R.id.nav_view);//NavigationView
 
         //设置Header内容
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_log://最近记录
                         //Toast.makeText(getApplicationContext(),"最近记录！" ,Toast.LENGTH_SHORT).show();
                         Intent intent2 = new Intent(getApplicationContext(), CheckInfoActivity.class);
+                        intent2.putExtra("userid",userid );
                         startActivity(intent2);
                         break;
                     case R.id.logout://退出
@@ -168,12 +176,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
-                intent.putExtra("Name", "test");
-                startActivity(intent);
+                intent.putExtra("userid", userid);
+                startActivityForResult(intent,TAKE_PHOTO);
                 //Toast.makeText(getApplicationContext(),"点击!" ,Toast.LENGTH_SHORT).show();
                 /*String imagename = username+".jpg";
                 File outputImage=new File(getExternalCacheDir(),imagename);//创建File对象，用于存储拍照后的照片
@@ -234,7 +243,10 @@ public class MainActivity extends AppCompatActivity {
             if (isFirstLocate){
                 LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude() );
                 Log.i(TAG, "经度："+location.getLatitude());
+
                 Log.i(TAG, "纬度:"+location.getLongitude());
+                Latitude=location.getLatitude();
+                Longitude=location.getLongitude();
                 MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(latLng);
                 baiduMap.animateMapStatus(update);
                 update = MapStatusUpdateFactory.zoomTo(18f);
@@ -306,8 +318,50 @@ public class MainActivity extends AppCompatActivity {
                 if (resultCode == RESULT_OK){
                     try{
                         mProgressDialog.show();
-                        File file = new File(imagePath_take);
-                        resize(file);//压缩图片
+                        final File src = (File) data.getSerializableExtra("file_return");
+                        HttpUtil.uploadjwd(getResources().getString(R.string.jwd_addr), ""+Latitude, ""+Longitude, new Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.i(TAG,"上传经纬度失败："+e.getMessage() );
+                                RunOnUI.Run(getApplicationContext(), "上传失败");
+                            }
+
+                            @Override
+                            public void onResponse(Call call, Response response) throws IOException {
+                                String statu = response.header("statu");
+                                Log.i(TAG,"经纬度反馈："+statu );
+                                //在范围内
+                                if ("in".equals(statu)){
+                                    HttpUtil.uploadImg(src,userid,getResources().getString(R.string.upload_addr), new Callback() {
+                                        @Override
+                                        public void onFailure(Call call, IOException e) {
+                                            RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
+                                            Log.i(TAG,"上传失败"+e.getMessage());
+                                            Log.i(TAG,"文件名："+src.getName() );
+                                            mProgressDialog.dismiss();
+                                        }
+
+                                        @Override
+                                        public void onResponse(Call call, Response response) {
+                                            Log.i(TAG,"上传成功");
+                                            Log.i(TAG,"文件名："+src.getName() );
+                                            //是否是本人
+                                            String statu = response.header("statu");
+                                            if ("Success".equals(statu)){
+                                                RunOnUI.Run(getApplicationContext(),"签到成功!");
+                                            }else{
+                                                RunOnUI.Run(getApplicationContext(),"签到失败，请洗脸！");
+                                            }
+                                            mProgressDialog.dismiss();
+                                        }
+                                    });
+                                }else{
+                                    //不在范围内
+                                    RunOnUI.Run(getApplicationContext(),"请在允许范围内签到！" );
+                                    mProgressDialog.dismiss();
+                                }
+                            }
+                        });
 
                     }catch (Exception e){
                         e.printStackTrace();
@@ -357,7 +411,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(final File file) {
                 Log.i(TAG,"压缩成功" );
-                    HttpUtil.uploadImg(file,getResources().getString(R.string.upload_addr), new Callback() {
+                    HttpUtil.uploadImg(file,userid,getResources().getString(R.string.upload_addr), new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
                             RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
@@ -377,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
             public void onError(Throwable e) {
                 final File file = new File(imagePath_take);
                 Log.i(TAG,"压缩失败"+e.getMessage());
-                HttpUtil.uploadImg(file, getResources().getString(R.string.upload_addr), new Callback() {
+                HttpUtil.uploadImg(file,userid, getResources().getString(R.string.upload_addr), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());

@@ -25,7 +25,8 @@ import okhttp3.RequestBody;
  * @updateDes ${TODO}
  */
 public class HttpUtil {
-    public static void sendOKHttpRequestPost(String address, Map map,okhttp3.Callback callback){
+
+    public static void login(String address, Map map,okhttp3.Callback callback){
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new FormBody.Builder()
                 .add("id",(String) map.get("id"))
@@ -126,7 +127,52 @@ public class HttpUtil {
         }).start();
     }
 
-    public static void uploadImg(File file, String url, okhttp3.Callback callback){
+    /**
+     * 上传经纬度
+     * @param addr
+     * @param j
+     * @param w
+     * @param callback
+     */
+    public static void uploadjwd(String addr,String j,String w,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("Latitude",j)
+                .add("Longitude",w)
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    /**
+     * 获得最近签到信息
+     * @param addr
+     * @param userid
+     * @param callback
+     */
+    public static void getinfo(String addr,String userid,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userid)
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    /**
+     * 上传图片
+     * @param file
+     * @param userid
+     * @param url
+     * @param callback
+     */
+    public static void uploadImg(File file,String userid,String url, okhttp3.Callback callback){
        OkHttpClient okHttpClient = new OkHttpClient();
         String filename;
         try {
@@ -134,6 +180,7 @@ public class HttpUtil {
             MultipartBody.Builder builder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("imgname", filename)
+                    .addFormDataPart("userid", userid)
                 .addFormDataPart("img",filename,
                         RequestBody.create(MediaType.parse("image/jpeg"),file ));
         RequestBody requestBody = builder.build();

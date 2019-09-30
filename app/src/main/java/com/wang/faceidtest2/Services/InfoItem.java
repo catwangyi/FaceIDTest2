@@ -8,14 +8,14 @@ package com.wang.faceidtest2.Services;
  * @updateDes ${TODO}
  */
 public class InfoItem {
-    private Status.LoginStatus status;
+    private String status;
     private String time;
 
-    public Status.LoginStatus getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Status.LoginStatus status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

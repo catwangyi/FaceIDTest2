@@ -62,7 +62,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
     private FaceEngine faceEngine;
     private int afCode = -1;
     private Button sendIMG;
-    private String username;
+    private String userid;
     private int processMask = FaceEngine.ASF_AGE | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_GENDER | FaceEngine.ASF_LIVENESS;
     /**
      * 相机预览显示的控件，可为SurfaceView或TextureView
@@ -85,7 +85,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
         setContentView(R.layout.activity_preview);
         sendIMG = findViewById(R.id.sendImg);
         final Intent intent=getIntent();
-        username = (String)intent.getSerializableExtra("Name");
+        userid = (String)intent.getSerializableExtra("userid");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WindowManager.LayoutParams attributes = getWindow().getAttributes();
@@ -169,7 +169,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                     @Override
                     public void onClick(View v) {
                         //1.选择流
-                        File src = new File(getExternalCacheDir(),username+".jpg");
+                        File src = new File(getExternalCacheDir(),userid+".jpg");
                         //2.选择流
                         OutputStream os = null;
                         try {
@@ -185,10 +185,14 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                                     previewSize.width ,previewSize.height );
                             //需要旋转90°
                             YuvImage image = new YuvImage(datas, ImageFormat.NV21, previewSize.height, previewSize.width, null);
-                            image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 70, os);
+                            image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, os);
                             // 将NV21格式图片，以质量70压缩成Jpeg，并得到JPEG数据流
                             //RunOnUI.Run(getApplicationContext(),"保存成功！" );
                             Log.i(TAG,"文件名"+src.getAbsolutePath() );
+                            Intent intent = new Intent();
+                            intent.putExtra("file_return", src);
+                            setResult(RESULT_OK,intent);
+                            finish();
                         }catch (Exception e){
                             e.printStackTrace();
                         }finally {

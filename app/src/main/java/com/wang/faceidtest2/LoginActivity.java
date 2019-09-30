@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -19,9 +20,13 @@ import android.widget.Toast;
 import com.arcsoft.face.ErrorInfo;
 import com.arcsoft.face.FaceEngine;
 import com.wang.faceidtest2.Common.Constants;
+import com.wang.faceidtest2.EncodeUtils.EncodeUtils;
+import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 import com.wang.faceidtest2.Services.User;
 
+import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +37,8 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Call;
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private Button login;
@@ -121,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
                     mMap.put("id",id);
                     mMap.put("pwd",pwd);
 
-                   /* HttpUtil.sendOKHttpRequestPost(getResources().getString(R.string.login_addr),mMap ,new okhttp3.Callback(){
+                    HttpUtil.login(getResources().getString(R.string.login_addr),mMap ,new okhttp3.Callback(){
                         @Override
                         public void onFailure(Call call, final IOException e) {
                             RunOnUI.Run(LoginActivity.this, "连接失败！");
@@ -133,6 +140,7 @@ public class LoginActivity extends AppCompatActivity {
                         public void onResponse(Call call, Response response) throws IOException {
                             Log.i(TAG, "----------------------"+response.header("Statu"));
                             String statu = response.header("Statu");
+
                             //得到返回的登录结果
                             if("NoSuchID".equals(statu)){
                                 RunOnUI.Run(LoginActivity.this,"用户名不存在" );
@@ -143,6 +151,7 @@ public class LoginActivity extends AppCompatActivity {
                                 String name = URLDecoder.decode(response.header("Name"),"utf-8" );
                                 Log.i(TAG,"name:"+name );
                                 String phone = response.header("Phone");
+                                id = response.header("userid");
                                 Log.i(TAG+"编码：", EncodeUtils.getEncoding(name));
                                 mEditor = mPreferences.edit();
                                 if (mCheckBox.isChecked()){
@@ -156,6 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                                 mEditor.commit();
                                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                                 intent.putExtra("Name", name);
+                                intent.putExtra("userid", id);
                                 intent.putExtra("Phone",phone);
                                 startActivity(intent);
                                 finish();
@@ -163,12 +173,12 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             mProgressDialog.dismiss();
                         }
-                    } );*/
-                    Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                    } );
+                    /*Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                     intent.putExtra("Name", "test");
                     intent.putExtra("Phone","test");
                     startActivity(intent);
-                    mProgressDialog.dismiss();
+                    mProgressDialog.dismiss();*/
 
                 }
 
