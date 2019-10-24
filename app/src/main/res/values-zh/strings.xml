@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">打卡小程序</string>
-    <string name="login_addr">http://192.168.43.93:8080//store_war_exploded/login</string>
-    <string name="jwd_addr">http://192.168.43.93:8080//store_war_exploded/jwd</string>
-    <string name="getinfo_addr">http://192.168.43.93:8080//store_war_exploded/getinfo</string>
-    <string name="upload_addr">http://192.168.43.93:8080//store_war_exploded/upload</string>
+    <string name="login_addr">http://192.168.43.254:8080//store_war_exploded/login</string>
+    <string name="jwd_addr">http://192.168.43.254:8080//store_war_exploded/jwd</string>
+    <string name="getinfo_addr">http://192.168.43.254:8080//store_war_exploded/getinfo</string>
+    <string name="upload_addr">http://192.168.43.254:8080//store_war_exploded/upload</string>
+    <string name="reg_addr">http://192.168.43.254:8080//store_war_exploded/reg</string>
+    <string name="getstaff_addr">http://192.168.43.254:8080//store_war_exploded/getstaff</string>
+    <string name="getp_addr">http://192.168.43.254:8080//store_war_exploded/getp</string>
+
+
     <string name="page_preview">人脸属性检测（视频）</string>
     <string name="page_ir_preview">红外活体检测（视频）</string>
     <string name="face_recognize_mode">人脸比对1:n（视频vs人脸库，RGB活体）</string>

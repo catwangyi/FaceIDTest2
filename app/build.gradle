@@ -1,8 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
-    splits{
-        abi{
+    splits {
+        abi {
             enable true
             reset()
             include 'armeabi-v7a'

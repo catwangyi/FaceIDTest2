@@ -34,7 +34,7 @@ public class CheckInfoActivity extends AppCompatActivity {
     private ListView lv;
     private final String TAG = "CheckInfoActivity";
     private CommonAdapter adapter;
-    private String userid;
+    private String id;
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler(){
         @Override
@@ -56,14 +56,14 @@ public class CheckInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_info);
-        lv=findViewById(R.id.lv);
+        lv=findViewById(R.id.lv_info);
         Intent intent = getIntent();
-        userid = (String)intent.getSerializableExtra("userid");
-        Log.i(TAG,"userid:" +userid);
+        id = (String)intent.getSerializableExtra("id");
+        Log.i(TAG,"userid:" +id);
 
         mInfoItems = new ArrayList<InfoItem>();
 
-        HttpUtil.getinfo(getResources().getString(R.string.getinfo_addr), userid, new Callback() {
+        HttpUtil.getinfo(getResources().getString(R.string.getinfo_addr), id, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 RunOnUI.Run(getApplicationContext(),"请求失败！" );
@@ -71,7 +71,6 @@ public class CheckInfoActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                InfoItem item = new InfoItem();
                 //处理结果
 
                 String json = response.body().string();
@@ -82,6 +81,7 @@ public class CheckInfoActivity extends AppCompatActivity {
                     JSONArray jsonArray=new JSONArray(json);
                     for(int i=0;i<jsonArray.length();i++)
                     {
+                        InfoItem item = new InfoItem();
                         JSONObject jsonObject=jsonArray.getJSONObject(i);
                         String time=jsonObject.getString("time");
                         String statu=jsonObject.getString("statu");

@@ -6,14 +6,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".CheckInfoActivity">
-<ListView
-    android:id="@+id/lv"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_weight="1"
-    android:scrollbarStyle="outsideOverlay"
-    android:scrollbarThumbVertical="@color/colorPrimaryDark"
-    android:scrollbars="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="match_parent"
+                android:text="签到时间"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18dp"
+                android:layout_height="match_parent"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:text="签到状态"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+        <ListView
+            android:id="@+id/lv_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:scrollbarStyle="outsideOverlay"
+            android:scrollbarThumbVertical="@color/colorPrimaryDark"
+            android:scrollbars="vertical">
 
-</ListView>
+        </ListView>
+    </LinearLayout>
 </LinearLayout>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/login_view"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -67,6 +68,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
+
             android:layout_height="wrap_content">
             <Button
                 android:id="@+id/login_ac"
@@ -74,19 +76,16 @@
                 android:text="登录"
                 android:textColor="#000"
                 android:layout_weight="1"
+                android:onClick="login"
                 android:textSize="20dp"
                 android:layout_height="wrap_content"/>
             <Button
                 android:layout_width="wrap_content"
-                android:text="激活引擎"
-                android:onClick="activeEngine"
-                android:layout_height="wrap_content"/>
-            <Button
-                android:layout_width="wrap_content"
-                android:text="退出"
+                android:text="注册"
                 android:layout_weight="1"
-                android:id="@+id/exit"
+                android:id="@+id/reg"
                 android:textSize="20dp"
+                android:onClick="reg"
                 android:textColor="#000"
                 android:layout_height="wrap_content"/>
         </LinearLayout>

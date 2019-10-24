@@ -10,19 +10,21 @@
         android:orientation="horizontal"
         android:layout_height="wrap_content">
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:id="@+id/time"
+            android:gravity="center"
             android:layout_weight="1"
             android:textSize="17dp"
             android:text="this is time"
             android:layout_alignParentRight="true"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"/>
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:id="@+id/status"
+            android:gravity="center"
             android:text="this is status"
             android:layout_weight="1"
             android:textSize="17dp"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"/>
     </LinearLayout>
 </LinearLayout>

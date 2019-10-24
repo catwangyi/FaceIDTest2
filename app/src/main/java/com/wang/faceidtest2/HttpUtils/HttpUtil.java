@@ -1,14 +1,9 @@
 package com.wang.faceidtest2.HttpUtils;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -26,11 +21,13 @@ import okhttp3.RequestBody;
  */
 public class HttpUtil {
 
+
     public static void login(String address, Map map,okhttp3.Callback callback){
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new FormBody.Builder()
                 .add("id",(String) map.get("id"))
                 .add("pwd",(String)map.get("pwd") )
+                .add("type", "login")
                 .build();
         Request request = new Request.Builder()
                 .url(address)
@@ -39,93 +36,7 @@ public class HttpUtil {
         client.newCall(request).enqueue(callback);
     }
 
-    public static void sendOKHttpRequestGet(String address,okhttp3.Callback callback){
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(address).build();
-        client.newCall(request).enqueue(callback);
-    }
 
-    public static void sendHttpRequestGet(final String address,final HttpCallbackListener listener){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpURLConnection connection=null;
-                try{
-                    URL url = new URL(address);
-                    connection =(HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setConnectTimeout(5000);
-                    connection.setDoOutput(true);
-                    connection.setDoInput(true);
-
-                    InputStream inputStream = connection.getInputStream();
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line=reader.readLine())!=null){
-                        response.append(line);
-                    }
-                    if (listener!=null){
-                        //回调onFinish方法
-                        listener.onFinish(response.toString());
-                    }
-                }catch (Exception e){
-                    if (listener!=null){
-                        //回调onError方法
-                        listener.onError(e);
-                    }
-                }finally {
-                    if(connection!=null){
-                        connection.disconnect();
-                    }
-                }
-            }
-        }).start();
-
-    }
-
-    public  static  void sendHttpRequestPost(final String address, final Map map, final HttpCallbackListener listener){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpURLConnection connection=null;
-                try{
-                    URL url = new URL(address);
-                    connection =(HttpURLConnection) url.openConnection();
-                    connection.setRequestMethod("POST");
-                    connection.setConnectTimeout(5000);
-                    connection.setDoOutput(true);
-                    connection.setDoInput(true);
-
-
-                    DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
-                    outputStream.writeBytes("id"+map.get("id")+"&"+"pwd"+map.get("pwd"));
-                    InputStream inputStream = connection.getInputStream();
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line=reader.readLine())!=null){
-                        response.append(line);
-                    }
-                    if (listener!=null){
-                        //回调onFinish方法
-                        listener.onFinish(response.toString());
-                    }
-                }catch (Exception e){
-                    if (listener!=null){
-                        //回调onError方法
-                        listener.onError(e);
-                    }
-                }finally {
-                    if(connection!=null){
-                        connection.disconnect();
-                    }
-                }
-            }
-        }).start();
-    }
 
     /**
      * 上传经纬度
@@ -165,24 +76,87 @@ public class HttpUtil {
         client.newCall(request).enqueue(callback);
     }
 
+
     /**
-     * 上传图片
-     * @param file
+     * 获取员工信息
+     * @param addr
      * @param userid
+     * @param callback
+     */
+    public static void getstaff(String addr,String userid,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userid)
+                .add("type","select")
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    public static void setleader(String addr,String userid,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userid)
+                .add("type","setleader")
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    public static void setstaff(String addr,String userid,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userid)
+                .add("type","setstaff")
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+
+    public static void deletestaff(String addr,String userid,okhttp3.Callback callback){
+        OkHttpClient client = new OkHttpClient();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("userid",userid)
+                .add("type","delete")
+                .build();
+        Request request = new Request.Builder()
+                .url(addr)
+                .post(requestBody)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    /**
+     * 验证时上传图片
+     * @param file
+     * @param id
      * @param url
      * @param callback
      */
-    public static void uploadImg(File file,String userid,String url, okhttp3.Callback callback){
-       OkHttpClient okHttpClient = new OkHttpClient();
+    public static void uploadImg(File file,String id,String url, okhttp3.Callback callback){
+       OkHttpClient okHttpClient = new OkHttpClient.Builder()
+               .connectTimeout(5, TimeUnit.SECONDS)
+               .readTimeout(60,TimeUnit.SECONDS )
+               .writeTimeout(60,TimeUnit.SECONDS)
+               .build();
         String filename;
         try {
             filename = URLEncoder.encode(file.getName(),"UTF-8");
             MultipartBody.Builder builder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("imgname", filename)
-                    .addFormDataPart("userid", userid)
-                .addFormDataPart("img",filename,
-                        RequestBody.create(MediaType.parse("image/jpeg"),file ));
+                    .addFormDataPart("id", id)
+                .addFormDataPart("img",filename,RequestBody.create(MediaType.parse("image/jpeg"),file ));
         RequestBody requestBody = builder.build();
 
         Request request = new Request.Builder()
@@ -193,5 +167,119 @@ public class HttpUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 注册用
+     * @param file
+     * @param id
+     * @param url
+     * @param callback
+     */
+    public static void uploadImg(File file,String type,int regnum,String id,String url, okhttp3.Callback callback){
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(60,TimeUnit.SECONDS )
+                .writeTimeout(60,TimeUnit.SECONDS)
+                .build();
+        String filename;
+        try {
+            filename = URLEncoder.encode(file.getName(),"UTF-8");
+            MultipartBody.Builder builder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("imgname", filename)
+                    .addFormDataPart("type",type)
+                    .addFormDataPart("id", id)
+                    .addFormDataPart("regnum", String.valueOf(regnum))
+                    .addFormDataPart("file",filename,RequestBody.create(MediaType.parse("image/jpeg"),file ));
+            RequestBody requestBody = builder.build();
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build();
+            okHttpClient.newCall(request).enqueue(callback);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 注册时上传的文件
+     * @param file
+     * @param id
+     * @param name
+     * @param pwd
+     * @param phone
+     * @param email
+     * @param type
+     * @param url
+     * @param callback
+     */
+    public static void uploadImg(File file,String id,String name ,String pwd,String phone,String email,String type,String url, okhttp3.Callback callback){
+        String imageType = "multipart/form-data";
+        RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpg"), file);
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", "head_image", fileBody)
+                .addFormDataPart("id", id)
+                .addFormDataPart("pwd", pwd)
+                .addFormDataPart("name", name)
+
+                .addFormDataPart("type",type)
+                .addFormDataPart("phone", phone)
+                .addFormDataPart("email", email)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        final okhttp3.OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder();
+        OkHttpClient okHttpClient = httpBuilder
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10,TimeUnit.SECONDS )
+                .writeTimeout(10,TimeUnit.SECONDS)
+                .build();
+        okHttpClient.newCall(request).enqueue(callback);
+    }
+
+    /**
+     * 注册时上传的文件
+     * @param file
+     * @param id
+     * @param name
+     * @param pwd
+     * @param regnum
+     * @param phone
+     * @param email
+     * @param type
+     * @param url
+     * @param callback
+     */
+    public static void uploadImg(File file,String regnum,String id,String name ,String pwd,String phone,String email,String type,String url, okhttp3.Callback callback){
+        String imageType = "multipart/form-data";
+        RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpg"), file);
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", "head_image", fileBody)
+                .addFormDataPart("id", id)
+                .addFormDataPart("pwd", pwd)
+                .addFormDataPart("name", name)
+                .addFormDataPart("regnum", regnum)
+                .addFormDataPart("type",type)
+                .addFormDataPart("phone", phone)
+                .addFormDataPart("email", email)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        final okhttp3.OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder();
+        OkHttpClient okHttpClient = httpBuilder
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20,TimeUnit.SECONDS )
+                .writeTimeout(20,TimeUnit.SECONDS)
+                .build();
+        okHttpClient.newCall(request).enqueue(callback);
     }
 }

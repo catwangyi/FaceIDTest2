@@ -1,11 +1,15 @@
 package com.wang.faceidtest2;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -50,9 +54,6 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
-import top.zibin.luban.Luban;
-import top.zibin.luban.OnCompressListener;
-import top.zibin.luban.OnRenameListener;
 
 public class MainActivity extends AppCompatActivity {
     private static final int TAKE_PHOTO = 1;
@@ -69,12 +70,35 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton mFloatingActionButton;
     private boolean isFirstLocate = true;//用来显示是否是第一次定位
     private DrawerLayout mDrawerLayout;
-    private String username;
+    private String name;
     private double Latitude;
     private double Longitude;
-    private String userid;
+    private ImageView imageView;
+    private String pwd;
+    private TextView username_tv;
+    private String email;
+    private String phone;
+    private String id;
+    private String status;
+    private String imgpath;
+    private TextView userphone_tv;
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 1://刚开始
+                    break;
+                case 2:
+                    Bitmap bitmap = (Bitmap) msg.obj;
+                    Log.i(TAG, "设置头像！");
+                    imageView.setImageBitmap(bitmap);
 
+                    break;
 
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,47 +112,70 @@ public class MainActivity extends AppCompatActivity {
         //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);//打开手动滑动弹出
         ActionBar actionBar = getSupportActionBar();
         final Intent intent=getIntent();
-        username = (String)intent.getSerializableExtra("Name");
-        userid = (String)intent.getSerializableExtra("userid");
-        Log.i(TAG,"userid"+userid );
+        name = (String)intent.getSerializableExtra("name");
+        id = (String)intent.getSerializableExtra("userid");
+        imgpath = (String)intent.getSerializableExtra("imgpath");
+        status = (String)intent.getSerializableExtra("status");//职位
+        email = (String)intent.getSerializableExtra("email");
+        phone = (String)intent.getSerializableExtra("phone");
+        pwd = (String)intent.getSerializableExtra("pwd");
+        Log.i(TAG,"密码："+pwd );
+
+        Log.i(TAG,"status"+status );
+        Log.i(TAG,"userid"+id );
         final NavigationView navigationView = findViewById(R.id.nav_view);//NavigationView
 
         //设置Header内容
         View headerView= navigationView.getHeaderView(0);
-        TextView username_tv = headerView.findViewById(R.id.username);
-        username_tv.setText(username);
-        TextView userphone_tv = headerView.findViewById(R.id.phone);
-        userphone_tv.setText((String)intent.getSerializableExtra("Phone"));
-        Log.i(TAG+"名字", username);
+        username_tv = headerView.findViewById(R.id.username);
+        username_tv.setText(name);
+        userphone_tv = headerView.findViewById(R.id.phone);
+        imageView = headerView.findViewById(R.id.id_avatar);
+
+        userphone_tv.setText((String)intent.getSerializableExtra("phone"));
+        Log.i(TAG+"名字", name);
         if (actionBar!=null){
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);//菜单按钮
         }
 
-
+        if ("leader".equals(status)){
+            navigationView.getMenu().findItem(R.id.manage).setVisible(true);
+        }
 
         //navigationView.setCheckedItem(R.id.nav_log);//设置默认选项
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
 
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {//处理按钮事件；
+                Intent intent1;
                 switch (menuItem.getItemId()){
                     case R.id.person_details:
-                        //Toast.makeText(getApplicationContext(),"个人资料！" ,Toast.LENGTH_SHORT).show();
-                        //Intent intent1 = new Intent(getApplicationContext(),LoginInfoActivity.class);
-                        //startActivity(intent1);
+                        Intent intent = new Intent(getApplicationContext(),PersonActivity.class);
+                        intent.putExtra("id", id);
+                        intent.putExtra("imgpath",imgpath);
+                        intent.putExtra("name", name);
+                        intent.putExtra("userid", id);
+                        intent.putExtra("email",email );
+                        intent.putExtra("pwd",pwd );
+                        intent.putExtra("status",status);
+                        intent.putExtra("phone",phone);
+                        startActivity(intent);
                         break;
                     case R.id.nav_log://最近记录
-                        //Toast.makeText(getApplicationContext(),"最近记录！" ,Toast.LENGTH_SHORT).show();
-                        Intent intent2 = new Intent(getApplicationContext(), CheckInfoActivity.class);
-                        intent2.putExtra("userid",userid );
-                        startActivity(intent2);
+                        intent1 = new Intent(getApplicationContext(), CheckInfoActivity.class);
+                        intent1.putExtra("id",id );
+                        startActivity(intent1);
                         break;
                     case R.id.logout://退出
-                        Intent intent3 = new Intent(getApplicationContext(),LoginActivity.class);
-                        startActivity(intent3);
-                        //Toast.makeText(getApplicationContext(),"退出！" ,Toast.LENGTH_SHORT ).show();
+                        intent1 = new Intent(getApplicationContext(),LoginActivity.class);
+                        startActivity(intent1);
                         finish();
+                        break;
+                    case R.id.manage:
+                        intent1 = new Intent(getApplicationContext(), ManageActivity.class);
+                        intent1.putExtra("id",id );
+                        startActivity(intent1);
                         break;
                 }
                 //关闭滑动菜单
@@ -181,32 +228,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(),PreviewActivity.class);
-                intent.putExtra("userid", userid);
+                intent.putExtra("id", id);
+                intent.putExtra("kind", "1");
                 startActivityForResult(intent,TAKE_PHOTO);
-                //Toast.makeText(getApplicationContext(),"点击!" ,Toast.LENGTH_SHORT).show();
-                /*String imagename = username+".jpg";
-                File outputImage=new File(getExternalCacheDir(),imagename);//创建File对象，用于存储拍照后的照片
-                imagePath_take=getExternalCacheDir()+"/"+imagename;
-                try{
-                    if (outputImage.exists()){
-                        outputImage.delete();//文件存在，就删除文件
-                    }
-                    outputImage.createNewFile();//创建新文件
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                if (Build.VERSION.SDK_INT>=24){//android7.0以上
-                    imageUri= FileProvider.getUriForFile(MainActivity.this,"com.wang.faceidtest2" , outputImage);
-                }else{//android7.0以下
-                    imageUri= Uri.fromFile(outputImage);
-                }
-                //启动相机程序
-                Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri );
-                startActivityForResult(intent,TAKE_PHOTO);*/
             }
         });
     }
+
 
 
     private void requestLocation(){
@@ -312,6 +340,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         switch (requestCode){
             case TAKE_PHOTO://拍照
@@ -332,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
                                 Log.i(TAG,"经纬度反馈："+statu );
                                 //在范围内
                                 if ("in".equals(statu)){
-                                    HttpUtil.uploadImg(src,userid,getResources().getString(R.string.upload_addr), new Callback() {
+                                    HttpUtil.uploadImg(src,id,getResources().getString(R.string.upload_addr), new Callback() {
                                         @Override
                                         public void onFailure(Call call, IOException e) {
                                             RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
@@ -347,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
                                             Log.i(TAG,"文件名："+src.getName() );
                                             //是否是本人
                                             String statu = response.header("statu");
-                                            if ("Success".equals(statu)){
+                                            if ("success".equals(statu)){
                                                 RunOnUI.Run(getApplicationContext(),"签到成功!");
                                             }else{
                                                 RunOnUI.Run(getApplicationContext(),"签到失败，请洗脸！");
@@ -368,6 +401,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                     break;
+            case 2:
+                String name =(String) data.getSerializableExtra("name");
+                String phone =(String) data.getSerializableExtra("phone");
+                username_tv.setText(name);
+                userphone_tv.setText(phone);
+                break;
         }
     }
 
@@ -377,12 +416,13 @@ public class MainActivity extends AppCompatActivity {
      * 定位
      */
     public class MyLocationListener extends BDAbstractLocationListener {
+    @SuppressLint("RestrictedApi")
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
 
         if (bdLocation.getLocType()==BDLocation.TypeGpsLocation||bdLocation.getLocType()==BDLocation.TypeNetWorkLocation){
+            mFloatingActionButton.setVisibility(View.VISIBLE);
             navigateTo(bdLocation);
-
         }else {
             if (!isFirstLocate){
                 Toast.makeText(getApplicationContext(), "发生未知错误，定位失败！", Toast.LENGTH_SHORT).show();
@@ -391,62 +431,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
-    /**
-     * 压缩图片
-     *
-     */
-    public void resize(final File src) {
-        Luban.with(getApplicationContext()).load(src).ignoreBy(1000).setTargetDir(src.getParent()).setRenameListener(new OnRenameListener() {
-            @Override
-            public String rename(String filePath) {
-                return username+".jpg";
-            }
-        }).setCompressListener(new OnCompressListener() {
-            @Override
-            public void onStart() {
-                Log.i(TAG,"开始压缩" );
-                Log.i(TAG,"图片位置："+src.getPath());
-            }
-
-            @Override
-            public void onSuccess(final File file) {
-                Log.i(TAG,"压缩成功" );
-                    HttpUtil.uploadImg(file,userid,getResources().getString(R.string.upload_addr), new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
-                            Log.i(TAG,"上传失败"+e.getMessage());
-                            mProgressDialog.dismiss();
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            Log.i(TAG,"上传成功");
-                            mProgressDialog.dismiss();
-                        }
-                    });
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                final File file = new File(imagePath_take);
-                Log.i(TAG,"压缩失败"+e.getMessage());
-                HttpUtil.uploadImg(file,userid, getResources().getString(R.string.upload_addr), new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
-                        Log.i(TAG,"上传失败"+e.getMessage());
-                        mProgressDialog.dismiss();
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        Log.i(TAG,"上传成功");
-                        mProgressDialog.dismiss();
-                    }
-                });
-            }
-        }).launch();
-    }
 
 }

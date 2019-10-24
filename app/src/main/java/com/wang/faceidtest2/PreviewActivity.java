@@ -31,6 +31,7 @@ import com.arcsoft.face.FaceInfo;
 import com.arcsoft.face.GenderInfo;
 import com.arcsoft.face.LivenessInfo;
 import com.arcsoft.face.VersionInfo;
+import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 import com.wang.faceidtest2.model.DrawInfo;
 import com.wang.faceidtest2.util.ConfigUtil;
@@ -42,9 +43,14 @@ import com.wang.faceidtest2.widget.FaceRectView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * @version $Rev$
@@ -61,8 +67,11 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
     private Integer rgbCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private FaceEngine faceEngine;
     private int afCode = -1;
+    private String kind;
+    private boolean upload= false;
     private Button sendIMG;
-    private String userid;
+    private String id;
+    private int imgnum=0;
     private int processMask = FaceEngine.ASF_AGE | FaceEngine.ASF_FACE3DANGLE | FaceEngine.ASF_GENDER | FaceEngine.ASF_LIVENESS;
     /**
      * 相机预览显示的控件，可为SurfaceView或TextureView
@@ -76,7 +85,9 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
      */
     private static final String[] NEEDED_PERMISSIONS = new String[]{
             Manifest.permission.CAMERA,
-            Manifest.permission.READ_PHONE_STATE
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
     @Override
@@ -85,7 +96,8 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
         setContentView(R.layout.activity_preview);
         sendIMG = findViewById(R.id.sendImg);
         final Intent intent=getIntent();
-        userid = (String)intent.getSerializableExtra("userid");
+        id = (String)intent.getSerializableExtra("id");
+        kind = (String)intent.getSerializableExtra("kind");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WindowManager.LayoutParams attributes = getWindow().getAttributes();
@@ -165,49 +177,6 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
 
             @Override
             public void onPreview(final byte[] nv21, Camera camera) {
-                sendIMG.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //1.选择流
-                        File src = new File(getExternalCacheDir(),userid+".jpg");
-                        //2.选择流
-                        OutputStream os = null;
-                        try {
-                            os = new FileOutputStream(src,false);
-                            //3.操作
-                            //String msg = "this is a test\r";//\r将光标移到行首 \n将光标移到下一行
-                            //byte[] datas = msg.getBytes();//字符串-->字节数组（编码）
-                            byte[] datas = RotateImg.rotateYUV420Degree90(
-                                    RotateImg.rotateYUV420Degree90(
-                                            RotateImg.rotateYUV420Degree90(
-                                                    nv21, previewSize.width,previewSize.height),
-                                            previewSize.height,previewSize.width),
-                                    previewSize.width ,previewSize.height );
-                            //需要旋转90°
-                            YuvImage image = new YuvImage(datas, ImageFormat.NV21, previewSize.height, previewSize.width, null);
-                            image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, os);
-                            // 将NV21格式图片，以质量70压缩成Jpeg，并得到JPEG数据流
-                            //RunOnUI.Run(getApplicationContext(),"保存成功！" );
-                            Log.i(TAG,"文件名"+src.getAbsolutePath() );
-                            Intent intent = new Intent();
-                            intent.putExtra("file_return", src);
-                            setResult(RESULT_OK,intent);
-                            finish();
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }finally {
-                            //4.释放资源
-                            try {
-                                if (os!=null){
-                                    os.close();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    }
-                });
                 if (faceRectView != null) {
                     faceRectView.clearFaceInfo();
                 }
@@ -219,6 +188,8 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                         return;
                     }
                 }else {
+                    //检测到人脸时才有按钮，没有人脸时按钮消失
+                    sendIMG.setVisibility(View.INVISIBLE);
                     return;
                 }
 
@@ -242,8 +213,103 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                         drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), null));
                     }
                     drawHelper.draw(faceRectView, drawInfoList);
+                    if (imgnum==0){
+                        sendIMG.setVisibility(View.VISIBLE);
+                    }
+                    if (upload==true){
+                        sendIMG.setVisibility(View.VISIBLE);
+                        upload = false;
+                    }
+                    //上传图片
+                    sendIMG.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            sendIMG.setVisibility(View.INVISIBLE);
+                            imgnum++;
+                            //1.选择流
+                            File src = new File(getExternalCacheDir(),id+"_"+imgnum+".jpg");
+                            //2.选择流
+                            OutputStream os = null;
+                            try {
+                                os = new FileOutputStream(src,false);
+                                //3.操作
+                                //String msg = "this is a test\r";//\r将光标移到行首 \n将光标移到下一行
+                                //byte[] datas = msg.getBytes();//字符串-->字节数组（编码）
+                                byte[] datas = RotateImg.rotateYUV420Degree90(
+                                        RotateImg.rotateYUV420Degree90(
+                                                RotateImg.rotateYUV420Degree90(
+                                                        nv21, previewSize.width,previewSize.height),
+                                                previewSize.height,previewSize.width),
+                                        previewSize.width ,previewSize.height );
+                                //需要旋转90°
+                                YuvImage image = new YuvImage(datas, ImageFormat.NV21, previewSize.height, previewSize.width, null);
+                                image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 90, os);
+                                // 将NV21格式图片，以质量70压缩成Jpeg，并得到JPEG数据流
+                                //RunOnUI.Run(getApplicationContext(),"保存成功！" );
+                                Log.i(TAG,"文件名"+src.getAbsolutePath() );
+                                if (kind.equals("1")){//打卡时
+                                    if (true){
+                                        Intent intent = new Intent();
+                                        intent.putExtra("file_return", src);
+                                        setResult(RESULT_OK,intent);
+                                        finish();
+                                    }
+                                }else if(kind.equals("2")){//注册时
+                                    if (imgnum<=4){
+                                        HttpUtil.uploadImg(src,"reg", imgnum, id, getResources().getString(R.string.reg_addr), new Callback() {
+                                            @Override
+                                            public void onFailure(Call call, IOException e) {
+                                                imgnum--;
+                                                RunOnUI.Run(getApplicationContext(),"上传失败");
+                                                upload = true;
+                                            }
+
+                                            @Override
+                                            public void onResponse(Call call, Response response) throws IOException {
+
+                                                    String statu = response.header("statu");
+                                                    if ("success".equals(statu)){
+                                                        RunOnUI.Run(getApplicationContext(), "再次点击上传");
+                                                        upload = true;
+                                                    }else if ("exist".equals(statu)){
+                                                        RunOnUI.Run(getApplicationContext(), "账号已存在");
+                                                        upload = true;
+                                                    }
+
+
+                                            }
+                                        });
+                                    }else {
+                                        Intent intent = new Intent();
+                                        intent.putExtra("file_return", src);
+                                        setResult(RESULT_OK,intent);
+                                        finish();
+                                    }
+                                }else{
+                                    Intent intent = new Intent();
+                                    intent.putExtra("file_return", src);
+                                    setResult(RESULT_OK,intent);
+                                    finish();
+                                }
+
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }finally {
+                                //4.释放资源
+                                try {
+                                    if (os!=null){
+                                        os.close();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+                    });
                 }
             }
+
 
             @Override
             public void onCameraClosed() {
@@ -257,6 +323,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
 
             @Override
             public void onCameraConfigurationChanged(int cameraID, int displayOrientation) {
+
                 if (drawHelper != null) {
                     drawHelper.setCameraDisplayOrientation(displayOrientation);
                 }
