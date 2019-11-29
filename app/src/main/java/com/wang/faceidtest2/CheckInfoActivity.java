@@ -11,8 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.InfoItem;
 import com.wang.faceidtest2.Services.RunOnUI;
@@ -58,12 +60,10 @@ public class CheckInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_check_info);
         lv=findViewById(R.id.lv_info);
         Intent intent = getIntent();
+        RadioGroup recent = findViewById(R.id.recent);
         id = (String)intent.getSerializableExtra("id");
         Log.i(TAG,"userid:" +id);
-
-        mInfoItems = new ArrayList<InfoItem>();
-
-        HttpUtil.getinfo(getResources().getString(R.string.getinfo_addr), id, new Callback() {
+        HttpUtil.getinfo("http://"+ Constants.IP+getResources().getString(R.string.getinfo_addr), id,"today", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 RunOnUI.Run(getApplicationContext(),"请求失败！" );
@@ -76,7 +76,7 @@ public class CheckInfoActivity extends AppCompatActivity {
                 String json = response.body().string();
 
                 Log.i(TAG, "json数据："+json);
-
+                mInfoItems = new ArrayList<InfoItem>();
                 try{
                     JSONArray jsonArray=new JSONArray(json);
                     for(int i=0;i<jsonArray.length();i++)
@@ -85,10 +85,13 @@ public class CheckInfoActivity extends AppCompatActivity {
                         JSONObject jsonObject=jsonArray.getJSONObject(i);
                         String time=jsonObject.getString("time");
                         String statu=jsonObject.getString("statu");
+                        String location = jsonObject.getString("location");
                         Log.i(TAG,"时间："+time );
                         Log.i(TAG,"状态"+statu );
+                        Log.i(TAG,"地点"+location );
                         item.setTime(time);
                         item.setStatus(statu);
+                        item.setLocation(location);
                         mInfoItems.add(item);
                     }
                     Message msg = Message.obtain();
@@ -101,6 +104,62 @@ public class CheckInfoActivity extends AppCompatActivity {
                 }
             }
         });
+        recent.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                String recent=null;
+                if(checkedId==R.id.re_today){
+                    recent = "today";
+                }else if(checkedId==R.id.re_week){
+                    recent = "week";
+                }else if(checkedId==R.id.re_mon){
+                    recent = "mon";
+                }
+                Log.i(TAG,"recent:"+recent );
+                HttpUtil.getinfo("http://"+ Constants.IP+getResources().getString(R.string.getinfo_addr), id,recent, new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        RunOnUI.Run(getApplicationContext(),"请求失败！" );
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        //处理结果
+
+                        String json = response.body().string();
+
+                        Log.i(TAG, "json数据："+json);
+                        mInfoItems = new ArrayList<InfoItem>();
+                        try{
+                            JSONArray jsonArray=new JSONArray(json);
+                            for(int i=0;i<jsonArray.length();i++)
+                            {
+                                InfoItem item = new InfoItem();
+                                JSONObject jsonObject=jsonArray.getJSONObject(i);
+                                String time=jsonObject.getString("time");
+                                String statu=jsonObject.getString("statu");
+                                String location = jsonObject.getString("location");
+                                Log.i(TAG,"时间："+time );
+                                Log.i(TAG,"状态"+statu );
+                                Log.i(TAG,"地点"+location );
+                                item.setTime(time);
+                                item.setStatus(statu);
+                                item.setLocation(location);
+                                mInfoItems.add(item);
+                            }
+                            Message msg = Message.obtain();
+                            msg.what=1;
+                            msg.obj = mInfoItems;
+                            mHandler.sendMessage(msg);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+
 
     }
 
@@ -133,9 +192,11 @@ public class CheckInfoActivity extends AppCompatActivity {
             }
             final TextView tv_infoitem_time = view.findViewById(R.id.time);
             final TextView tv_infoitem_status = view.findViewById(R.id.status);
+            final TextView tv_infoitem_location = view.findViewById(R.id.location);
 
             tv_infoitem_time.setText(mInfoItems.get(position).getTime().toString());
             tv_infoitem_status.setText(mInfoItems.get(position).getStatus().toString());
+            tv_infoitem_location.setText(mInfoItems.get(position).getLocation().toString());
             return view;
         }
     }

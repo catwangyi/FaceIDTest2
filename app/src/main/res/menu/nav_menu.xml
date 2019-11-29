@@ -18,6 +18,12 @@
         android:title="打卡记录"
         />
     <item
+        android:id="@+id/tj"
+        android:icon="@drawable/tj"
+        android:title="员工打卡记录"
+        android:visible="false"
+        />
+    <item
         android:id="@+id/logout"
         android:icon="@drawable/logout"
         android:title="注销"

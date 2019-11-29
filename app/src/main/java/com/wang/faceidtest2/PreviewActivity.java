@@ -31,6 +31,7 @@ import com.arcsoft.face.FaceInfo;
 import com.arcsoft.face.GenderInfo;
 import com.arcsoft.face.LivenessInfo;
 import com.arcsoft.face.VersionInfo;
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 import com.wang.faceidtest2.model.DrawInfo;
@@ -210,7 +211,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                 if (faceRectView != null && drawHelper != null) {
                     List<DrawInfo> drawInfoList = new ArrayList<>();
                     for (int i = 0; i < faceInfoList.size(); i++) {
-                        drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), null));
+                        drawInfoList.add(new DrawInfo(drawHelper.adjustRect(faceInfoList.get(i).getRect()), genderInfoList.get(i).getGender(), ageInfoList.get(i).getAge(), faceLivenessInfoList.get(i).getLiveness(), " "));
                     }
                     drawHelper.draw(faceRectView, drawInfoList);
                     if (imgnum==0){
@@ -256,7 +257,7 @@ public class PreviewActivity extends AppCompatActivity implements ViewTreeObserv
                                     }
                                 }else if(kind.equals("2")){//注册时
                                     if (imgnum<=4){
-                                        HttpUtil.uploadImg(src,"reg", imgnum, id, getResources().getString(R.string.reg_addr), new Callback() {
+                                        HttpUtil.uploadImg(src,"reg", imgnum, id, "http://"+ Constants.IP+getResources().getString(R.string.reg_addr), new Callback() {
                                             @Override
                                             public void onFailure(Call call, IOException e) {
                                                 imgnum--;

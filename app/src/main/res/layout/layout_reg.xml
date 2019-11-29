@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
-        android:layout_gravity="center_vertical"
+        android:paddingTop="50dp"
         android:layout_height="wrap_content">
         <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="100dp"
@@ -98,6 +98,7 @@
             <EditText
                 android:id="@+id/et_phone_reg"
                 android:layout_width="match_parent"
+                android:digits="0123456789"
                 android:hint="请输入电话"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
@@ -115,6 +116,7 @@
                 android:id="@+id/et_email_reg"
                 android:layout_width="match_parent"
                 android:hint="请输入邮箱"
+                android:digits="0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.@_-"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 

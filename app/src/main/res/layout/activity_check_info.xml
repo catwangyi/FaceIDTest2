@@ -10,6 +10,31 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="match_parent">
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:id="@+id/recent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
+            <RadioButton
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:id="@+id/re_today"
+                android:checked="true"
+                android:text="最近一天"
+                android:layout_height="match_parent"/>
+            <RadioButton
+                android:layout_width="match_parent"
+                android:text="最近一周"
+                android:id="@+id/re_week"
+                android:layout_weight="1"
+                android:layout_height="match_parent"/>
+            <RadioButton
+                android:layout_width="match_parent"
+                android:text="最近一月"
+                android:id="@+id/re_mon"
+                android:layout_weight="1"
+                android:layout_height="match_parent"/>
+        </RadioGroup>
         <LinearLayout
             android:layout_width="match_parent"
             android:orientation="horizontal"
@@ -28,6 +53,14 @@
                 android:gravity="center"
                 android:textSize="18dp"
                 android:layout_height="match_parent"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:text="签到地点"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="18dp"
+                android:layout_height="match_parent"/>
+
         </LinearLayout>
         <ListView
             android:id="@+id/lv_info"

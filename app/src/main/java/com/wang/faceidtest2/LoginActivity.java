@@ -194,7 +194,7 @@ public class LoginActivity extends AppCompatActivity {
             public void run() {
                 Log.i(TAG, "开始下载！");
                 DownloadUtil downloadUtil = new DownloadUtil();
-                downloadUtil.download(getResources().getString(R.string.getp_addr),id,getExternalCacheDir().getPath(),id+".jpg", new DownloadUtil.OnDownloadListener() {
+                downloadUtil.download("http://"+Constants.IP+getResources().getString(R.string.getp_addr),id,getExternalCacheDir().getPath(),id+".jpg", new DownloadUtil.OnDownloadListener() {
                     @Override
                     public void onDownloadSuccess(File file) {
                         //RunOnUI.Run(getApplicationContext(),"下载成功");
@@ -230,7 +230,7 @@ public class LoginActivity extends AppCompatActivity {
                 mMap.put("id",id);
                 mMap.put("pwd",pwd);
 
-                HttpUtil.login(getResources().getString(R.string.login_addr),mMap ,new okhttp3.Callback(){
+                HttpUtil.login("http://"+Constants.IP+getResources().getString(R.string.login_addr),mMap ,new okhttp3.Callback(){
                     @Override
                     public void onFailure(Call call, final IOException e) {
                         RunOnUI.Run(LoginActivity.this, "连接失败！");

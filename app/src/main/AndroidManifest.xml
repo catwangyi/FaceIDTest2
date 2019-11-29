@@ -29,16 +29,22 @@
         android:theme="@style/AppTheme">
         <activity android:name=".PersonActivity">
         </activity>
+
+        <activity android:name=".tjActivity">
+        </activity>
+
         <activity android:name=".ManageActivity">
         </activity>
+
         <activity android:name=".CheckInfoActivity">
         </activity>
-        <activity android:name=".PersonActivity">
-        </activity>
+
         <activity android:name=".RegActivity">
         </activity>
+
         <activity android:name=".PreviewActivity">
         </activity>
+
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

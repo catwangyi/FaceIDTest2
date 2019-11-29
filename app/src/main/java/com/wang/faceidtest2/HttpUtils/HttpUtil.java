@@ -48,8 +48,8 @@ public class HttpUtil {
     public static void uploadjwd(String addr,String j,String w,okhttp3.Callback callback){
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new FormBody.Builder()
-                .add("Latitude",j)
-                .add("Longitude",w)
+                .add("Longitude",j)
+                .add("Latitude",w)
                 .build();
         Request request = new Request.Builder()
                 .url(addr)
@@ -64,10 +64,11 @@ public class HttpUtil {
      * @param userid
      * @param callback
      */
-    public static void getinfo(String addr,String userid,okhttp3.Callback callback){
+    public static void getinfo(String addr,String userid,String recent,okhttp3.Callback callback){
         OkHttpClient client = new OkHttpClient();
         RequestBody requestBody = new FormBody.Builder()
                 .add("userid",userid)
+                .add("recent", recent)
                 .build();
         Request request = new Request.Builder()
                 .url(addr)
@@ -143,7 +144,7 @@ public class HttpUtil {
      * @param url
      * @param callback
      */
-    public static void uploadImg(File file,String id,String url, okhttp3.Callback callback){
+    public static void uploadImg(File file,String location,String id,String url, okhttp3.Callback callback){
        OkHttpClient okHttpClient = new OkHttpClient.Builder()
                .connectTimeout(5, TimeUnit.SECONDS)
                .readTimeout(60,TimeUnit.SECONDS )
@@ -156,6 +157,7 @@ public class HttpUtil {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("imgname", filename)
                     .addFormDataPart("id", id)
+                    .addFormDataPart("location",location)
                 .addFormDataPart("img",filename,RequestBody.create(MediaType.parse("image/jpeg"),file ));
         RequestBody requestBody = builder.build();
 
@@ -276,9 +278,9 @@ public class HttpUtil {
                 .build();
         final okhttp3.OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder();
         OkHttpClient okHttpClient = httpBuilder
-                .connectTimeout(20, TimeUnit.SECONDS)
-                .readTimeout(20,TimeUnit.SECONDS )
-                .writeTimeout(20,TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30,TimeUnit.SECONDS )
+                .writeTimeout(30,TimeUnit.SECONDS)
                 .build();
         okHttpClient.newCall(request).enqueue(callback);
     }

@@ -1,6 +1,6 @@
 package com.wang.faceidtest2.LBSUtils;
 
-import android.location.Location;
+import com.baidu.location.BDLocation;
 
 /**
  * @version $Rev$
@@ -10,7 +10,7 @@ import android.location.Location;
  * @updateDes ${TODO}
  */
 public class LBSUtils {
-    public static String locationUpdates(Location location){
+    public static String locationUpdates(BDLocation location){
         if (location != null){
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("您的位置是：\n")

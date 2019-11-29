@@ -21,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,7 +43,9 @@ import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
+import com.wang.faceidtest2.LBSUtils.LBSUtils;
 import com.wang.faceidtest2.Services.RunOnUI;
 import com.wang.faceidtest2.util.ConfigUtil;
 
@@ -71,9 +74,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFirstLocate = true;//用来显示是否是第一次定位
     private DrawerLayout mDrawerLayout;
     private String name;
-    private double Latitude;
-    private double Longitude;
     private ImageView imageView;
+    private BDLocation mBDLocation;
     private String pwd;
     private TextView username_tv;
     private String email;
@@ -93,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
                     Bitmap bitmap = (Bitmap) msg.obj;
                     Log.i(TAG, "设置头像！");
                     imageView.setImageBitmap(bitmap);
-
                     break;
 
             }
@@ -139,8 +140,9 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);//菜单按钮
         }
 
-        if ("leader".equals(status)){
+        if (!"staff".equals(status)){
             navigationView.getMenu().findItem(R.id.manage).setVisible(true);
+            navigationView.getMenu().findItem(R.id.tj).setVisible(true);
         }
 
         //navigationView.setCheckedItem(R.id.nav_log);//设置默认选项
@@ -160,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("pwd",pwd );
                         intent.putExtra("status",status);
                         intent.putExtra("phone",phone);
-                        startActivity(intent);
+                        startActivityForResult(intent,2);
                         break;
                     case R.id.nav_log://最近记录
                         intent1 = new Intent(getApplicationContext(), CheckInfoActivity.class);
@@ -175,6 +177,10 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.manage:
                         intent1 = new Intent(getApplicationContext(), ManageActivity.class);
                         intent1.putExtra("id",id );
+                        startActivity(intent1);
+                        break;
+                    case R.id.tj:
+                        intent1 = new Intent(getApplicationContext(),tjActivity.class);
                         startActivity(intent1);
                         break;
                 }
@@ -270,11 +276,7 @@ public class MainActivity extends AppCompatActivity {
         if(location!=null){
             if (isFirstLocate){
                 LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude() );
-                Log.i(TAG, "经度："+location.getLatitude());
-
-                Log.i(TAG, "纬度:"+location.getLongitude());
-                Latitude=location.getLatitude();
-                Longitude=location.getLongitude();
+                Log.i(TAG, LBSUtils.locationUpdates(location));
                 MapStatusUpdate update = MapStatusUpdateFactory.newLatLng(latLng);
                 baiduMap.animateMapStatus(update);
                 update = MapStatusUpdateFactory.zoomTo(18f);
@@ -308,6 +310,8 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+        Log.i(TAG, "执行onResume");
+        navigateTo(mBDLocation);
     }
 
     @Override
@@ -346,13 +350,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        Log.i(TAG,"requestCode"+requestCode );
+        Log.i(TAG,"resultCode"+resultCode );
         switch (requestCode){
             case TAKE_PHOTO://拍照
                 if (resultCode == RESULT_OK){
                     try{
                         mProgressDialog.show();
                         final File src = (File) data.getSerializableExtra("file_return");
-                        HttpUtil.uploadjwd(getResources().getString(R.string.jwd_addr), ""+Latitude, ""+Longitude, new Callback() {
+                        Log.i(TAG, "上传的经纬度"+LBSUtils.locationUpdates(mBDLocation));
+
+                        HttpUtil.uploadjwd("http://"+ Constants.IP+getResources().getString(R.string.jwd_addr), ""+mBDLocation.getLongitude(), ""+mBDLocation.getLatitude(), new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {
                                 Log.i(TAG,"上传经纬度失败："+e.getMessage() );
@@ -364,8 +372,8 @@ public class MainActivity extends AppCompatActivity {
                                 String statu = response.header("statu");
                                 Log.i(TAG,"经纬度反馈："+statu );
                                 //在范围内
-                                if ("in".equals(statu)){
-                                    HttpUtil.uploadImg(src,id,getResources().getString(R.string.upload_addr), new Callback() {
+                                if (!TextUtils.isEmpty(statu)){
+                                    HttpUtil.uploadImg(src,statu,id,"http://"+Constants.IP+getResources().getString(R.string.upload_addr), new Callback() {
                                         @Override
                                         public void onFailure(Call call, IOException e) {
                                             RunOnUI.Run(getApplicationContext(),"上传失败"+e.getMessage());
@@ -402,11 +410,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                     break;
             case 2:
-                String name =(String) data.getSerializableExtra("name");
-                String phone =(String) data.getSerializableExtra("phone");
-                username_tv.setText(name);
-                userphone_tv.setText(phone);
-                break;
+                if (resultCode==RESULT_OK){
+                    Log.i(TAG, "修改MainACctivity中的信息");
+                    name =(String) data.getSerializableExtra("name");
+                    phone =(String) data.getSerializableExtra("phone");
+                    email = (String)data.getSerializableExtra("email");
+                    pwd = (String)data.getSerializableExtra("pwd");
+                    username_tv.setText(name);
+                    userphone_tv.setText(phone);
+                    break;
+                }
         }
     }
 
@@ -419,10 +432,12 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("RestrictedApi")
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
-
+        mBDLocation = bdLocation;
         if (bdLocation.getLocType()==BDLocation.TypeGpsLocation||bdLocation.getLocType()==BDLocation.TypeNetWorkLocation){
             mFloatingActionButton.setVisibility(View.VISIBLE);
+            mBDLocation = bdLocation;
             navigateTo(bdLocation);
+            Log.i(TAG, LBSUtils.locationUpdates(bdLocation));
         }else {
             if (!isFirstLocate){
                 Toast.makeText(getApplicationContext(), "发生未知错误，定位失败！", Toast.LENGTH_SHORT).show();
@@ -430,6 +445,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 }
 
 }

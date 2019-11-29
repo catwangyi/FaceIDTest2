@@ -11,6 +11,16 @@ public class InfoItem {
     private String status;
     private String time;
 
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    private String location;
+
     public String getStatus() {
         return status;
     }

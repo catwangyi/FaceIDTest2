@@ -10,6 +10,7 @@ package com.wang.faceidtest2.Common;
 public class Constants {
     public static final String APP_ID = "3cmQvDa5RkbH1eSeXNskjB6Y8QyZeSpZRdv2HRmauhc6";
     public static final String SDK_KEY = "2P8dbzmxzHGQTHUTD6hTFZYBrGVo81adwJ5Mru1bZLTh";
+    public static final String IP = "24ul671508.zicp.vip:35564";
     /**
      * IR预览数据相对于RGB预览数据的横向偏移量，注意：是预览数据，一般的摄像头的预览数据都是 width > height
      */

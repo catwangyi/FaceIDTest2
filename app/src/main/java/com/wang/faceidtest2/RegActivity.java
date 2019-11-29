@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 
@@ -107,7 +108,7 @@ public class RegActivity extends AppCompatActivity {
                             if (/*PhoneNumUtil.isMobileNumber(phone)*/true){
 
                                 mProgressDialog.show();
-                                HttpUtil.uploadImg(imgsrc, "5", id, name, pwd, phone, email, "reg", getResources().getString(R.string.reg_addr), new Callback() {
+                                HttpUtil.uploadImg(imgsrc, "5", id, name, pwd, phone, email, "reg", "http://"+ Constants.IP+getResources().getString(R.string.reg_addr), new Callback() {
                                     @Override
                                     public void onFailure(Call call, IOException e) {
                                         mProgressDialog.dismiss();

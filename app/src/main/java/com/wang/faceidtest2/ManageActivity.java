@@ -18,6 +18,7 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 import com.wang.faceidtest2.Services.StaffItem;
@@ -69,7 +70,7 @@ public class ManageActivity extends AppCompatActivity {
 
         mStaffItems = new ArrayList<StaffItem>();
 
-        HttpUtil.getstaff(getResources().getString(R.string.getstaff_addr), id, new Callback() {
+        HttpUtil.getstaff("http://"+ Constants.IP+getResources().getString(R.string.getstaff_addr), id, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 RunOnUI.Run(getApplicationContext(), "查询失败！");
@@ -158,7 +159,7 @@ public class ManageActivity extends AppCompatActivity {
                     builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            HttpUtil.deletestaff(getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
+                            HttpUtil.deletestaff("http://"+Constants.IP+getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
                                 @Override
                                 public void onFailure(Call call, IOException e) {
                                     RunOnUI.Run(getApplicationContext(), "网络错误！");
@@ -197,7 +198,7 @@ public class ManageActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked){//选中
-                        HttpUtil.setleader(getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
+                        HttpUtil.setleader("http://"+Constants.IP+getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {
                                 RunOnUI.Run(getApplicationContext(), "网络错误！");
@@ -215,7 +216,7 @@ public class ManageActivity extends AppCompatActivity {
                             }
                         });
                     }else{//取消选中
-                        HttpUtil.setstaff(getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
+                        HttpUtil.setstaff("http://"+Constants.IP+getResources().getString(R.string.getstaff_addr), mStaffItems.get(position).getId(), new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {
                                 RunOnUI.Run(getApplicationContext(), "网络错误！");

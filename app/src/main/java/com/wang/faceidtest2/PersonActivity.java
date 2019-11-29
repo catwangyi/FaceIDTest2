@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.wang.faceidtest2.Common.Constants;
 import com.wang.faceidtest2.HttpUtils.HttpUtil;
 import com.wang.faceidtest2.Services.RunOnUI;
 
@@ -53,7 +54,6 @@ public class PersonActivity extends AppCompatActivity {
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-
             super.handleMessage(msg);
         }
     };
@@ -73,7 +73,7 @@ public class PersonActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_person);
+        setContentView(R.layout.layout_reg);
         userimg = findViewById(R.id.userimg);
         tv_id = findViewById(R.id.et_id_reg);
         et_pwd = findViewById(R.id.et_pwd_reg);
@@ -81,7 +81,8 @@ public class PersonActivity extends AppCompatActivity {
         et_name = findViewById(R.id.et_name_reg);
         et_phone = findViewById(R.id.et_phone_reg);
         et_email = findViewById(R.id.et_email_reg);
-        change = findViewById(R.id.change);
+        change = findViewById(R.id.reg);
+        change.setText("修改");
         final Intent intent=getIntent();
         id = (String)intent.getSerializableExtra("id");
         pwd = (String)intent.getSerializableExtra("pwd");
@@ -120,11 +121,11 @@ public class PersonActivity extends AppCompatActivity {
         change.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String pwd = et_pwd.getText().toString().trim();
+                final String pwd = et_pwd.getText().toString().trim();
                 String pwd_con = et_pwd_con.getText().toString().trim();
                 final String name = et_name.getText().toString().trim();
                 final String phone = et_phone.getText().toString().trim();
-                String email = et_email.getText().toString().trim();
+                final String email = et_email.getText().toString().trim();
                 if ((!pwd.isEmpty())&&(!pwd.isEmpty())&&(!pwd_con.isEmpty())&&(!name.isEmpty())&&(!phone.isEmpty())&&(!email.isEmpty())){
                     if (pwd.equals(pwd_con)){
 
@@ -132,7 +133,7 @@ public class PersonActivity extends AppCompatActivity {
                             if (/*PhoneNumUtil.isMobileNumber(phone)*/true){
 
                                 mProgressDialog.show();
-                                HttpUtil.uploadImg(imgsrc, "5",id, name, pwd, phone, email,"update", getResources().getString(R.string.reg_addr), new Callback() {
+                                HttpUtil.uploadImg(imgsrc, "5",id, name, pwd, phone, email,"update", "http://"+ Constants.IP+getResources().getString(R.string.reg_addr), new Callback() {
                                     @Override
                                     public void onFailure(Call call, IOException e) {
                                         mProgressDialog.dismiss();
@@ -147,7 +148,9 @@ public class PersonActivity extends AppCompatActivity {
                                             Intent intent = new Intent();
                                             intent.putExtra("name", name);
                                             intent.putExtra("phone", phone);
-                                            setResult(2,intent);
+                                            intent.putExtra("email", email);
+                                            intent.putExtra("pwd", pwd);
+                                            setResult(-1,intent);
                                             finish();
                                         }else{
                                             RunOnUI.Run(getApplicationContext(), "修改失败");
